@@ -15,8 +15,8 @@ class GameViewController: UIViewController {
         super.viewDidLoad()
         
         if let view = self.view as? SKView {
-            // Create the scene programmatically so it doesn't rely on GameScene.sks
-            let scene = GameScene(size: view.bounds.size)
+            // Present the menu first
+            let scene = MenuScene(size: view.bounds.size)
             scene.scaleMode = .resizeFill
             view.presentScene(scene)
 
@@ -38,3 +38,4 @@ class GameViewController: UIViewController {
         return true
     }
 }
+
