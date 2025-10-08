@@ -8,81 +8,214 @@
 import SpriteKit
 import GameplayKit
 
-class GameScene: SKScene {
-    
-    private var label : SKLabelNode?
-    private var spinnyNode : SKShapeNode?
-    
+class GameScene: SKScene, SKPhysicsContactDelegate {
+
+    private enum Physics: UInt32 {
+        case player = 1
+        case coin   = 1 << 1
+        case enemy  = 1 << 2
+        case edge   = 1 << 3
+    }
+
+    private var player: SKShapeNode!
+    private var scoreLabel = SKLabelNode(fontNamed: "AvenirNext-Bold")
+    private var stateLabel = SKLabelNode(fontNamed: "AvenirNext-Bold")
+    private var score = 0
+    private var isGameOver = false
+
     override func didMove(to view: SKView) {
-        
-        // Get label node from scene and store it for use later
-        self.label = self.childNode(withName: "//helloLabel") as? SKLabelNode
-        if let label = self.label {
-            label.alpha = 0.0
-            label.run(SKAction.fadeIn(withDuration: 2.0))
-        }
-        
-        // Create shape node to use during mouse interaction
-        let w = (self.size.width + self.size.height) * 0.05
-        self.spinnyNode = SKShapeNode.init(rectOf: CGSize.init(width: w, height: w), cornerRadius: w * 0.3)
-        
-        if let spinnyNode = self.spinnyNode {
-            spinnyNode.lineWidth = 2.5
-            
-            spinnyNode.run(SKAction.repeatForever(SKAction.rotate(byAngle: CGFloat(Double.pi), duration: 1)))
-            spinnyNode.run(SKAction.sequence([SKAction.wait(forDuration: 0.5),
-                                              SKAction.fadeOut(withDuration: 0.5),
-                                              SKAction.removeFromParent()]))
-        }
+        backgroundColor = SKColor.black
+        physicsWorld.gravity = .zero
+        physicsWorld.contactDelegate = self
+
+        physicsBody = SKPhysicsBody(edgeLoopFrom: frame)
+        physicsBody?.categoryBitMask = Physics.edge.rawValue
+        physicsBody?.collisionBitMask = 0
+
+        setupLabels()
+        setupPlayer()
+        startGame()
     }
-    
-    
-    func touchDown(atPoint pos : CGPoint) {
-        if let n = self.spinnyNode?.copy() as! SKShapeNode? {
-            n.position = pos
-            n.strokeColor = SKColor.green
-            self.addChild(n)
-        }
+
+    private func setupLabels() {
+        scoreLabel.fontSize = 24
+        scoreLabel.horizontalAlignmentMode = .left
+        scoreLabel.verticalAlignmentMode = .top
+        scoreLabel.position = CGPoint(x: 16, y: size.height - 16)
+        scoreLabel.text = "Score: 0"
+        addChild(scoreLabel)
+
+        stateLabel.fontSize = 28
+        stateLabel.alpha = 0.0
+        stateLabel.position = CGPoint(x: size.width/2, y: size.height/2)
+        addChild(stateLabel)
     }
-    
-    func touchMoved(toPoint pos : CGPoint) {
-        if let n = self.spinnyNode?.copy() as! SKShapeNode? {
-            n.position = pos
-            n.strokeColor = SKColor.blue
-            self.addChild(n)
-        }
+
+    private func setupPlayer() {
+        let radius: CGFloat = 18
+        player = SKShapeNode(circleOfRadius: radius)
+        player.fillColor = .white
+        player.strokeColor = .clear
+        player.position = CGPoint(x: size.width/2, y: size.height * 0.2)
+        player.zPosition = 5
+
+        player.physicsBody = SKPhysicsBody(circleOfRadius: radius)
+        player.physicsBody?.isDynamic = true
+        player.physicsBody?.affectedByGravity = false
+        player.physicsBody?.allowsRotation = false
+        player.physicsBody?.categoryBitMask = Physics.player.rawValue
+        player.physicsBody?.collisionBitMask = 0
+        player.physicsBody?.contactTestBitMask = Physics.coin.rawValue | Physics.enemy.rawValue
+        addChild(player)
     }
-    
-    func touchUp(atPoint pos : CGPoint) {
-        if let n = self.spinnyNode?.copy() as! SKShapeNode? {
-            n.position = pos
-            n.strokeColor = SKColor.red
-            self.addChild(n)
-        }
+
+    private func startGame() {
+        isGameOver = false
+        score = 0
+        updateScore()
+        stateLabel.alpha = 0.0
+
+        removeAllActions()
+        // Start spawners
+        let coinSpawner = SKAction.repeatForever(SKAction.sequence([
+            SKAction.wait(forDuration: 0.6, withRange: 0.6),
+            SKAction.run { [weak self] in self?.spawnCoin() }
+        ]))
+        let enemySpawner = SKAction.repeatForever(SKAction.sequence([
+            SKAction.wait(forDuration: 1.6, withRange: 0.8),
+            SKAction.run { [weak self] in self?.spawnEnemy() }
+        ]))
+        run(coinSpawner, withKey: "coinSpawner")
+        run(enemySpawner, withKey: "enemySpawner")
     }
-    
+
+    private func gameOver() {
+        guard !isGameOver else { return }
+        isGameOver = true
+        removeAction(forKey: "coinSpawner")
+        removeAction(forKey: "enemySpawner")
+
+        // Fade remaining falling objects
+        enumerateChildNodes(withName: "coin") { node, _ in node.removeAllActions(); node.run(.fadeOut(withDuration: 0.2)) }
+        enumerateChildNodes(withName: "enemy") { node, _ in node.removeAllActions(); node.run(.fadeOut(withDuration: 0.2)) }
+
+        stateLabel.text = "Game Over — Tap to Restart"
+        stateLabel.alpha = 1.0
+    }
+
+    private func updateScore() {
+        scoreLabel.text = "Score: \(score)"
+    }
+
+    private func spawnCoin() {
+        let r: CGFloat = 10
+        let node = SKShapeNode(circleOfRadius: r)
+        node.name = "coin"
+        node.fillColor = .systemYellow
+        node.strokeColor = .clear
+        let x = CGFloat.random(in: r...(size.width - r))
+        node.position = CGPoint(x: x, y: size.height + r)
+        node.zPosition = 1
+
+        let body = SKPhysicsBody(circleOfRadius: r)
+        body.isDynamic = true
+        body.affectedByGravity = false
+        body.categoryBitMask = Physics.coin.rawValue
+        body.collisionBitMask = 0
+        body.contactTestBitMask = Physics.player.rawValue
+        node.physicsBody = body
+        addChild(node)
+
+        // Motion
+        let speed: CGFloat = CGFloat.random(in: 140...220)
+        let duration = TimeInterval((node.position.y + 20) / speed)
+        let move = SKAction.moveTo(y: -20, duration: duration)
+        node.run(SKAction.sequence([move, .removeFromParent()]))
+    }
+
+    private func spawnEnemy() {
+        let s: CGFloat = 22
+        let node = SKShapeNode(rectOf: CGSize(width: s, height: s), cornerRadius: 4)
+        node.name = "enemy"
+        node.fillColor = .systemRed
+        node.strokeColor = .clear
+        let x = CGFloat.random(in: s...(size.width - s))
+        node.position = CGPoint(x: x, y: size.height + s)
+        node.zPosition = 2
+
+        let body = SKPhysicsBody(rectangleOf: CGSize(width: s, height: s))
+        body.isDynamic = true
+        body.affectedByGravity = false
+        body.categoryBitMask = Physics.enemy.rawValue
+        body.collisionBitMask = 0
+        body.contactTestBitMask = Physics.player.rawValue
+        node.physicsBody = body
+        addChild(node)
+
+        // Motion
+        let speed: CGFloat = CGFloat.random(in: 220...320)
+        let duration = TimeInterval((node.position.y + 20) / speed)
+        let move = SKAction.moveTo(y: -20, duration: duration)
+        node.run(SKAction.sequence([move, .removeFromParent()]))
+    }
+
+    // MARK: - Input
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        if let label = self.label {
-            label.run(SKAction.init(named: "Pulse")!, withKey: "fadeInOut")
+        if isGameOver {
+            // Restart
+            removeAllChildren()
+            setupLabels()
+            setupPlayer()
+            startGame()
+            return
         }
-        
-        for t in touches { self.touchDown(atPoint: t.location(in: self)) }
+        guard let t = touches.first else { return }
+        movePlayer(t.location(in: self))
     }
-    
+
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
-        for t in touches { self.touchMoved(toPoint: t.location(in: self)) }
+        guard let t = touches.first, !isGameOver else { return }
+        movePlayer(t.location(in: self))
     }
-    
-    override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
-        for t in touches { self.touchUp(atPoint: t.location(in: self)) }
+
+    private func movePlayer(_ position: CGPoint) {
+        let clampedX = max(16, min(size.width - 16, position.x))
+        let clampedY = max(16, min(size.height - 16, position.y))
+        player.run(SKAction.move(to: CGPoint(x: clampedX, y: clampedY), duration: 0.05))
     }
-    
-    override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
-        for t in touches { self.touchUp(atPoint: t.location(in: self)) }
+
+    // MARK: - Physics
+    func didBegin(_ contact: SKPhysicsContact) {
+        let a = contact.bodyA.categoryBitMask
+        let b = contact.bodyB.categoryBitMask
+
+        let playerMask = Physics.player.rawValue
+        let coinMask = Physics.coin.rawValue
+        let enemyMask = Physics.enemy.rawValue
+
+        // Player & coin
+        if (a == playerMask && b == coinMask) || (a == coinMask && b == playerMask) {
+            if let node = (a == coinMask ? contact.bodyA.node : contact.bodyB.node) {
+                node.removeFromParent()
+            }
+            score += 1
+            updateScore()
+            return
+        }
+
+        // Player & enemy
+        if (a == playerMask && b == enemyMask) || (a == enemyMask && b == playerMask) {
+            gameOver()
+            return
+        }
     }
-    
-    
+
     override func update(_ currentTime: TimeInterval) {
-        // Called before each frame is rendered
+        // Keep player inside the scene bounds just in case
+        guard player != nil else { return }
+        var p = player.position
+        p.x = max(16, min(size.width - 16, p.x))
+        p.y = max(16, min(size.height - 16, p.y))
+        player.position = p
     }
 }
