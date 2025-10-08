@@ -12,9 +12,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
 
     private enum Physics: UInt32 {
         case player = 1
-        case coin   = 1 << 1
-        case enemy  = 1 << 2
-        case edge   = 1 << 3
+        case coin   = 2
+        case enemy  = 4
+        case edge   = 8
     }
 
     private var player: SKShapeNode!
