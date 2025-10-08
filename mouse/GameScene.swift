@@ -20,6 +20,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     private var player: SKShapeNode!
     private var scoreLabel = SKLabelNode(fontNamed: "AvenirNext-Bold")
     private var stateLabel = SKLabelNode(fontNamed: "AvenirNext-Bold")
+    private var backLabel = SKLabelNode(fontNamed: "AvenirNext-Bold")
     private var score = 0
     private var isGameOver = false
 
@@ -34,6 +35,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
 
         setupLabels()
         setupPlayer()
+        setupBackButton()
         startGame()
     }
 
@@ -49,6 +51,18 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         stateLabel.alpha = 0.0
         stateLabel.position = CGPoint(x: size.width/2, y: size.height/2)
         addChild(stateLabel)
+    }
+
+    private func setupBackButton() {
+        backLabel.text = "〈 Back"
+        backLabel.fontSize = 20
+        backLabel.fontColor = .systemBlue
+        backLabel.horizontalAlignmentMode = .left
+        backLabel.verticalAlignmentMode = .top
+        backLabel.position = CGPoint(x: 16, y: size.height - 50)
+        backLabel.name = "back_button"
+        backLabel.zPosition = 10
+        addChild(backLabel)
     }
 
     private func setupPlayer() {
@@ -161,11 +175,22 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
 
     // MARK: - Input
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        // Back to menu if back button tapped
+        if let t = touches.first {
+            let location = t.location(in: self)
+            let tappedNodes = nodes(at: location)
+            if tappedNodes.contains(where: { $0.name == "back_button" }) {
+                goBackToMenu()
+                return
+            }
+        }
+        
         if isGameOver {
             // Restart
             removeAllChildren()
             setupLabels()
             setupPlayer()
+            setupBackButton()
             startGame()
             return
         }
@@ -217,5 +242,17 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         p.x = max(16, min(size.width - 16, p.x))
         p.y = max(16, min(size.height - 16, p.y))
         player.position = p
+
+        // Keep back button anchored to top-left
+        if backLabel.parent != nil {
+            backLabel.position = CGPoint(x: 16, y: size.height - 50)
+        }
+    }
+
+    private func goBackToMenu() {
+        guard let view = self.view else { return }
+        let menu = MenuScene(size: view.bounds.size)
+        menu.scaleMode = .resizeFill
+        view.presentScene(menu, transition: .push(with: .left, duration: 0.3))
     }
 }
