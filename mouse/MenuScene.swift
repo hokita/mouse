@@ -15,6 +15,7 @@ final class MenuScene: SKScene {
     private let game1Label = SKLabelNode(fontNamed: "AvenirNext-Bold")
     private let game2Label = SKLabelNode(fontNamed: "AvenirNext-Bold")
     private let game3Label = SKLabelNode(fontNamed: "AvenirNext-Bold")
+    private let game4Label = SKLabelNode(fontNamed: "AvenirNext-Bold")
 
     // MARK: - Presenting
     static func present(on skView: SKView, size: CGSize? = nil) {
@@ -78,6 +79,15 @@ final class MenuScene: SKScene {
         game3Label.horizontalAlignmentMode = .center
         game3Label.verticalAlignmentMode = .center
         addChild(game3Label)
+
+        // Game 4 - How Many Balls
+        game4Label.text = "▶︎ How Many Balls"
+        game4Label.name = "game_how_many_balls"
+        game4Label.fontSize = 28
+        game4Label.fontColor = .systemOrange
+        game4Label.horizontalAlignmentMode = .center
+        game4Label.verticalAlignmentMode = .center
+        addChild(game4Label)
     }
 
     private func layoutUI() {
@@ -90,6 +100,7 @@ final class MenuScene: SKScene {
         game1Label.position = CGPoint(x: w/2, y: h * 0.42)
         game2Label.position = CGPoint(x: w/2, y: h * 0.34)
         game3Label.position = CGPoint(x: w/2, y: h * 0.26)
+        game4Label.position = CGPoint(x: w/2, y: h * 0.18)
     }
 
     // MARK: - Input
@@ -104,6 +115,8 @@ final class MenuScene: SKScene {
             startShellGame()
         } else if nodes.contains(where: { $0.name == "game_rps" }) {
             startRockPaperScissors()
+        } else if nodes.contains(where: { $0.name == "game_how_many_balls" }) {
+            startHowManyBalls()
         }
     }
 
@@ -126,5 +139,12 @@ final class MenuScene: SKScene {
         let scene = RockPaperScissorsScene(size: view.bounds.size)
         scene.scaleMode = .resizeFill
         view.presentScene(scene, transition: .flipHorizontal(withDuration: 0.35))
+    }
+
+    private func startHowManyBalls() {
+        guard let view = self.view else { return }
+        let scene = HowManyBallsScene(size: view.bounds.size)
+        scene.scaleMode = .resizeFill
+        view.presentScene(scene, transition: .fade(withDuration: 0.35))
     }
 }

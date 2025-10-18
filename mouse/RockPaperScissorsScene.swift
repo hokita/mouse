@@ -178,7 +178,7 @@ class RockPaperScissorsScene: SKScene {
             result = "You Lose!"
             color = .systemRed
             losses += 1
-            soundFile = "gameover.caf"
+            soundFile = "fail.mp3"
         }
 
         resultLabel.text = result

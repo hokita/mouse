@@ -284,7 +284,7 @@ class ShellGameScene: SKScene {
             updateScore()
             instructionLabel.text = "Wrong! Try again - Tap to continue"
             instructionLabel.fontColor = .systemRed
-            run(SKAction.playSoundFileNamed("gameover.caf", waitForCompletion: false))
+            run(SKAction.playSoundFileNamed("fail.mp3", waitForCompletion: false))
         }
     }
 
