@@ -26,9 +26,66 @@ final class MenuScene: SKScene {
     }
 
     override func didMove(to view: SKView) {
-        backgroundColor = .black
+        backgroundColor = SKColor(red: 0.05, green: 0.05, blue: 0.15, alpha: 1.0)
         setupUI()
         layoutUI()
+        startMouseAnimation()
+    }
+
+    private func startMouseAnimation() {
+        // Spawn mice continuously
+        let spawnAction = SKAction.sequence([
+            SKAction.run { [weak self] in
+                self?.spawnMouse()
+            },
+            SKAction.wait(forDuration: 0.8)
+        ])
+        run(SKAction.repeatForever(spawnAction), withKey: "mouse_spawner")
+    }
+
+    private func spawnMouse() {
+        // Create a mouse using emoji
+        let mouse = SKLabelNode(text: "🐁")
+        mouse.fontSize = CGFloat.random(in: 30...50)
+        mouse.zPosition = -1 // Behind everything
+        mouse.alpha = 0.6
+
+        // Random starting position from edges
+        let edge = Int.random(in: 0...3)
+        switch edge {
+        case 0: // Left
+            mouse.position = CGPoint(x: -50, y: CGFloat.random(in: 0...size.height))
+        case 1: // Right
+            mouse.position = CGPoint(x: size.width + 50, y: CGFloat.random(in: 0...size.height))
+        case 2: // Top
+            mouse.position = CGPoint(x: CGFloat.random(in: 0...size.width), y: size.height + 50)
+        default: // Bottom
+            mouse.position = CGPoint(x: CGFloat.random(in: 0...size.width), y: -50)
+        }
+
+        addChild(mouse)
+
+        // Random destination
+        let destX = CGFloat.random(in: 0...size.width)
+        let destY = CGFloat.random(in: 0...size.height)
+        let destination = CGPoint(x: destX, y: destY)
+
+        // Calculate duration based on distance
+        let dx = destination.x - mouse.position.x
+        let dy = destination.y - mouse.position.y
+        let distance = sqrt(dx * dx + dy * dy)
+        let duration = TimeInterval(distance / 100)
+
+        // Move and fade out
+        let moveAction = SKAction.move(to: destination, duration: duration)
+        let fadeOut = SKAction.fadeOut(withDuration: 1.0)
+        let remove = SKAction.removeFromParent()
+
+        mouse.run(SKAction.sequence([
+            moveAction,
+            SKAction.group([fadeOut, SKAction.wait(forDuration: 0.5)]),
+            remove
+        ]))
     }
 
     override func didChangeSize(_ oldSize: CGSize) {
@@ -120,7 +177,12 @@ final class MenuScene: SKScene {
         }
     }
 
+    private func stopMouseAnimation() {
+        removeAction(forKey: "mouse_spawner")
+    }
+
     private func startCollectCoins() {
+        stopMouseAnimation()
         guard let view = self.view else { return }
         let scene = GameScene(size: view.bounds.size)
         scene.scaleMode = .resizeFill
@@ -128,6 +190,7 @@ final class MenuScene: SKScene {
     }
 
     private func startShellGame() {
+        stopMouseAnimation()
         guard let view = self.view else { return }
         let scene = ShellGameScene(size: view.bounds.size)
         scene.scaleMode = .resizeFill
@@ -135,6 +198,7 @@ final class MenuScene: SKScene {
     }
 
     private func startRockPaperScissors() {
+        stopMouseAnimation()
         guard let view = self.view else { return }
         let scene = RockPaperScissorsScene(size: view.bounds.size)
         scene.scaleMode = .resizeFill
@@ -142,6 +206,7 @@ final class MenuScene: SKScene {
     }
 
     private func startHowManyBalls() {
+        stopMouseAnimation()
         guard let view = self.view else { return }
         let scene = HowManyBallsScene(size: view.bounds.size)
         scene.scaleMode = .resizeFill
