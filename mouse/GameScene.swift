@@ -43,7 +43,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         scoreLabel.fontSize = 24
         scoreLabel.horizontalAlignmentMode = .left
         scoreLabel.verticalAlignmentMode = .top
-        scoreLabel.position = CGPoint(x: 16, y: size.height - 16)
+        scoreLabel.position = CGPoint(x: 16, y: size.height - 80)
         scoreLabel.text = "Score: 0"
         addChild(scoreLabel)
 
@@ -232,8 +232,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
 
         // Player & enemy
         if (a == playerMask && b == enemyMask) || (a == enemyMask && b == playerMask) {
-            // Play game over sound
-            run(SKAction.playSoundFileNamed("gameover.caf", waitForCompletion: false))
+            // Play boom sound
+            run(SKAction.playSoundFileNamed("boom.mp3", waitForCompletion: false))
             gameOver()
             return
         }
