@@ -38,7 +38,7 @@ final class MenuScene: SKScene {
 
     private func setupUI() {
         // Title
-        titleLabel.text = "Arcade"
+        titleLabel.text = "Mouse"
         titleLabel.fontSize = 44
         titleLabel.fontColor = .white
         titleLabel.horizontalAlignmentMode = .center
