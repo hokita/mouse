@@ -225,11 +225,15 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             }
             score += 1
             updateScore()
+            // Play coin collection sound
+            run(SKAction.playSoundFileNamed("coin.caf", waitForCompletion: false))
             return
         }
 
         // Player & enemy
         if (a == playerMask && b == enemyMask) || (a == enemyMask && b == playerMask) {
+            // Play game over sound
+            run(SKAction.playSoundFileNamed("gameover.caf", waitForCompletion: false))
             gameOver()
             return
         }
