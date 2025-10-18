@@ -259,7 +259,7 @@ class ShellGameScene: SKScene {
             updateScore()
             instructionLabel.text = "Correct! 🎉 Tap to continue"
             instructionLabel.fontColor = .systemGreen
-            run(SKAction.playSoundFileNamed("coin.caf", waitForCompletion: false))
+            run(SKAction.playSoundFileNamed("fanfare.mp3", waitForCompletion: false))
         } else {
             // Wrong guess - lift both the guessed shell and the correct shell
             let guessedShell = shells[index]
