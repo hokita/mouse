@@ -106,15 +106,25 @@ class ShellGameScene: SKScene {
         isShowingResult = false
         ballHiddenUnder = Int.random(in: 0..<shellCount)
 
-        // Show ball under random shell
-        ball.position = shells[ballHiddenUnder].position
-        ball.position.y -= shellHeight/2 + 20
+        // Show ball under random shell (at fixed height, hidden under the shell)
+        let shellY = size.height * 0.45
+        let ballY = shellY - shellHeight/2 + 10  // Ball sits inside/under the shell
+        ball.position = CGPoint(x: getShellX(forSlot: ballHiddenUnder), y: ballY)
         ball.alpha = 1.0
 
         instructionLabel.text = "Watch the ball..."
 
+        // Lift the shell to show the ball
+        let revealShell = shells[ballHiddenUnder]
+        let revealX = getShellX(forSlot: ballHiddenUnder)
+        revealShell.run(SKAction.sequence([
+            SKAction.move(to: CGPoint(x: revealX, y: shellY + 60), duration: 0.3),
+            SKAction.wait(forDuration: 1.2),
+            SKAction.move(to: CGPoint(x: revealX, y: shellY), duration: 0.3)
+        ]))
+
         // Sequence: show ball -> hide ball -> shuffle -> ask for guess
-        let showDuration = 1.5
+        let showDuration = 1.8  // Wait for shell lift animation
         let hideDuration = 0.5
 
         run(SKAction.sequence([
@@ -134,6 +144,12 @@ class ShellGameScene: SKScene {
         instructionLabel.text = "Hiding..."
     }
 
+    private func getShellX(forSlot slot: Int) -> CGFloat {
+        let spacing = shellWidth + 40
+        let startX = (size.width - CGFloat(shellCount - 1) * spacing) / 2
+        return startX + CGFloat(slot) * spacing
+    }
+
     private func shuffleShells() {
         isShuffling = true
         instructionLabel.text = "Follow the shell!"
@@ -150,12 +166,13 @@ class ShellGameScene: SKScene {
                 index2 = Int.random(in: 0..<shellCount)
             }
 
-            let x1 = shells[index1].position.x
-            let x2 = shells[index2].position.x
+            // Compute expected positions based on grid
+            let x1 = getShellX(forSlot: index2)  // Shell at index1 will move to slot index2
+            let x2 = getShellX(forSlot: index1)  // Shell at index2 will move to slot index1
 
             let move1 = SKAction.run { [weak self] in
-                self?.shells[index1].run(SKAction.move(to: CGPoint(x: x2, y: shellY), duration: 0.4))
-                self?.shells[index2].run(SKAction.move(to: CGPoint(x: x1, y: shellY), duration: 0.4))
+                self?.shells[index1].run(SKAction.move(to: CGPoint(x: x1, y: shellY), duration: 0.4))
+                self?.shells[index2].run(SKAction.move(to: CGPoint(x: x2, y: shellY), duration: 0.4))
             }
 
             let swap = SKAction.run { [weak self] in
@@ -219,17 +236,17 @@ class ShellGameScene: SKScene {
         hasGuessed = true
         isShowingResult = true
 
-        // Reveal the ball (position it further below the shell for better visibility)
-        ball.position = shells[ballHiddenUnder].position
-        ball.position.y -= shellHeight/2 + 20
+        // Reveal the ball (update X position only, keep Y fixed)
+        let shellY = size.height * 0.45
+        let ballY = shellY - shellHeight/2 + 10  // Same height as initial position
+        ball.position = CGPoint(x: getShellX(forSlot: ballHiddenUnder), y: ballY)
         ball.alpha = 1.0
 
-        // Lift the guessed shell higher so ball is clearly visible
+        // Lift the guessed shell up high to reveal ball underneath
         let liftedShell = shells[index]
-        let shellY = size.height * 0.45
-        let currentX = liftedShell.position.x
+        let currentX = getShellX(forSlot: index)
         liftedShell.run(SKAction.sequence([
-            SKAction.moveTo(y: shellY + 70, duration: 0.3),
+            SKAction.move(to: CGPoint(x: currentX, y: shellY + 80), duration: 0.3),
             SKAction.wait(forDuration: 1.5),
             SKAction.move(to: CGPoint(x: currentX, y: shellY), duration: 0.3)
         ]))
