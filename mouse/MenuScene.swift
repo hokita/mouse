@@ -60,11 +60,11 @@ final class MenuScene: SKScene {
         game1Label.verticalAlignmentMode = .center
         addChild(game1Label)
 
-        // Game 2 (placeholder)
-        game2Label.text = "⌛ Coming Soon"
-        game2Label.name = "game_coming_soon"
-        game2Label.fontSize = 24
-        game2Label.fontColor = .gray
+        // Game 2 - Shell Game
+        game2Label.text = "▶︎ Shell Game"
+        game2Label.name = "game_shell_game"
+        game2Label.fontSize = 28
+        game2Label.fontColor = .systemTeal
         game2Label.horizontalAlignmentMode = .center
         game2Label.verticalAlignmentMode = .center
         addChild(game2Label)
@@ -89,13 +89,8 @@ final class MenuScene: SKScene {
 
         if nodes.contains(where: { $0.name == "game_collect_coins" }) {
             startCollectCoins()
-        } else if nodes.contains(where: { $0.name == "game_coming_soon" }) {
-            // Simple pulse to indicate disabled
-            let pulse = SKAction.sequence([
-                .fadeAlpha(to: 0.5, duration: 0.08),
-                .fadeAlpha(to: 1.0, duration: 0.08)
-            ])
-            game2Label.run(pulse)
+        } else if nodes.contains(where: { $0.name == "game_shell_game" }) {
+            startShellGame()
         }
     }
 
@@ -104,5 +99,12 @@ final class MenuScene: SKScene {
         let scene = GameScene(size: view.bounds.size)
         scene.scaleMode = .resizeFill
         view.presentScene(scene, transition: .doorsOpenVertical(withDuration: 0.35))
+    }
+
+    private func startShellGame() {
+        guard let view = self.view else { return }
+        let scene = ShellGameScene(size: view.bounds.size)
+        scene.scaleMode = .resizeFill
+        view.presentScene(scene, transition: .doorsOpenHorizontal(withDuration: 0.35))
     }
 }
