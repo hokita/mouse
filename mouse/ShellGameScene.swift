@@ -141,6 +141,7 @@ class ShellGameScene: SKScene {
         // Number of shuffle moves
         let moveCount = 6 + score / 2
         var shuffleSequence: [SKAction] = []
+        let shellY = size.height * 0.45  // Keep Y position constant
 
         for _ in 0..<moveCount {
             let index1 = Int.random(in: 0..<shellCount)
@@ -149,12 +150,12 @@ class ShellGameScene: SKScene {
                 index2 = Int.random(in: 0..<shellCount)
             }
 
-            let pos1 = shells[index1].position
-            let pos2 = shells[index2].position
+            let x1 = shells[index1].position.x
+            let x2 = shells[index2].position.x
 
             let move1 = SKAction.run { [weak self] in
-                self?.shells[index1].run(SKAction.move(to: pos2, duration: 0.4))
-                self?.shells[index2].run(SKAction.move(to: pos1, duration: 0.4))
+                self?.shells[index1].run(SKAction.move(to: CGPoint(x: x2, y: shellY), duration: 0.4))
+                self?.shells[index2].run(SKAction.move(to: CGPoint(x: x1, y: shellY), duration: 0.4))
             }
 
             let swap = SKAction.run { [weak self] in
@@ -194,8 +195,14 @@ class ShellGameScene: SKScene {
             return
         }
 
-        // If shuffling or already guessed, ignore
-        if isShuffling || hasGuessed {
+        // If showing result, tap anywhere to continue
+        if isShowingResult {
+            nextRound()
+            return
+        }
+
+        // If shuffling, ignore
+        if isShuffling {
             return
         }
 
@@ -205,11 +212,6 @@ class ShellGameScene: SKScene {
                 makeGuess(index: index)
                 return
             }
-        }
-
-        // If showing result, tap anywhere to continue
-        if isShowingResult {
-            nextRound()
         }
     }
 
