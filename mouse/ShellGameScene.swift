@@ -39,9 +39,9 @@ class ShellGameScene: SKScene {
 
     private func setupLabels() {
         scoreLabel.fontSize = 24
-        scoreLabel.horizontalAlignmentMode = .left
+        scoreLabel.horizontalAlignmentMode = .center
         scoreLabel.verticalAlignmentMode = .top
-        scoreLabel.position = CGPoint(x: 16, y: size.height - 80)
+        scoreLabel.position = CGPoint(x: size.width/2, y: size.height - 200)
         scoreLabel.text = "Wins: 0  Losses: 0"
         addChild(scoreLabel)
 
