@@ -14,6 +14,7 @@ final class MenuScene: SKScene {
 
     private let game1Label = SKLabelNode(fontNamed: "AvenirNext-Bold")
     private let game2Label = SKLabelNode(fontNamed: "AvenirNext-Bold")
+    private let game3Label = SKLabelNode(fontNamed: "AvenirNext-Bold")
 
     // MARK: - Presenting
     static func present(on skView: SKView, size: CGSize? = nil) {
@@ -68,6 +69,15 @@ final class MenuScene: SKScene {
         game2Label.horizontalAlignmentMode = .center
         game2Label.verticalAlignmentMode = .center
         addChild(game2Label)
+
+        // Game 3 - Rock Paper Scissors
+        game3Label.text = "▶︎ Rock Paper Scissors"
+        game3Label.name = "game_rps"
+        game3Label.fontSize = 28
+        game3Label.fontColor = .systemPurple
+        game3Label.horizontalAlignmentMode = .center
+        game3Label.verticalAlignmentMode = .center
+        addChild(game3Label)
     }
 
     private func layoutUI() {
@@ -79,6 +89,7 @@ final class MenuScene: SKScene {
 
         game1Label.position = CGPoint(x: w/2, y: h * 0.42)
         game2Label.position = CGPoint(x: w/2, y: h * 0.34)
+        game3Label.position = CGPoint(x: w/2, y: h * 0.26)
     }
 
     // MARK: - Input
@@ -91,6 +102,8 @@ final class MenuScene: SKScene {
             startCollectCoins()
         } else if nodes.contains(where: { $0.name == "game_shell_game" }) {
             startShellGame()
+        } else if nodes.contains(where: { $0.name == "game_rps" }) {
+            startRockPaperScissors()
         }
     }
 
@@ -106,5 +119,12 @@ final class MenuScene: SKScene {
         let scene = ShellGameScene(size: view.bounds.size)
         scene.scaleMode = .resizeFill
         view.presentScene(scene, transition: .doorsOpenHorizontal(withDuration: 0.35))
+    }
+
+    private func startRockPaperScissors() {
+        guard let view = self.view else { return }
+        let scene = RockPaperScissorsScene(size: view.bounds.size)
+        scene.scaleMode = .resizeFill
+        view.presentScene(scene, transition: .flipHorizontal(withDuration: 0.35))
     }
 }
