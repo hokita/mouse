@@ -108,7 +108,7 @@ class ShellGameScene: SKScene {
 
         // Show ball under random shell
         ball.position = shells[ballHiddenUnder].position
-        ball.position.y -= shellHeight/2 - 10
+        ball.position.y -= shellHeight/2 + 20
         ball.alpha = 1.0
 
         instructionLabel.text = "Watch the ball..."
@@ -219,17 +219,19 @@ class ShellGameScene: SKScene {
         hasGuessed = true
         isShowingResult = true
 
-        // Reveal the ball
+        // Reveal the ball (position it further below the shell for better visibility)
         ball.position = shells[ballHiddenUnder].position
-        ball.position.y -= shellHeight/2 - 10
+        ball.position.y -= shellHeight/2 + 20
         ball.alpha = 1.0
 
-        // Lift the guessed shell
+        // Lift the guessed shell higher so ball is clearly visible
         let liftedShell = shells[index]
+        let shellY = size.height * 0.45
+        let currentX = liftedShell.position.x
         liftedShell.run(SKAction.sequence([
-            SKAction.moveBy(x: 0, y: 30, duration: 0.3),
+            SKAction.moveTo(y: shellY + 70, duration: 0.3),
             SKAction.wait(forDuration: 1.5),
-            SKAction.moveBy(x: 0, y: -30, duration: 0.3)
+            SKAction.move(to: CGPoint(x: currentX, y: shellY), duration: 0.3)
         ]))
 
         if index == ballHiddenUnder {
