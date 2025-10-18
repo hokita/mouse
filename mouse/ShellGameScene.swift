@@ -242,24 +242,41 @@ class ShellGameScene: SKScene {
         ball.position = CGPoint(x: getShellX(forSlot: ballHiddenUnder), y: ballY)
         ball.alpha = 1.0
 
-        // Lift the guessed shell up high to reveal ball underneath
-        let liftedShell = shells[index]
-        let currentX = getShellX(forSlot: index)
-        liftedShell.run(SKAction.sequence([
-            SKAction.move(to: CGPoint(x: currentX, y: shellY + 80), duration: 0.3),
-            SKAction.wait(forDuration: 1.5),
-            SKAction.move(to: CGPoint(x: currentX, y: shellY), duration: 0.3)
-        ]))
-
         if index == ballHiddenUnder {
-            // Correct guess!
+            // Correct guess! Lift only the guessed shell
+            let liftedShell = shells[index]
+            let currentX = getShellX(forSlot: index)
+            liftedShell.run(SKAction.sequence([
+                SKAction.move(to: CGPoint(x: currentX, y: shellY + 80), duration: 0.3),
+                SKAction.wait(forDuration: 1.5),
+                SKAction.move(to: CGPoint(x: currentX, y: shellY), duration: 0.3)
+            ]))
+
             score += 1
             updateScore()
             instructionLabel.text = "Correct! 🎉 Tap to continue"
             instructionLabel.fontColor = .systemGreen
             run(SKAction.playSoundFileNamed("coin.caf", waitForCompletion: false))
         } else {
-            // Wrong guess
+            // Wrong guess - lift both the guessed shell and the correct shell
+            let guessedShell = shells[index]
+            let guessedX = getShellX(forSlot: index)
+            let correctShell = shells[ballHiddenUnder]
+            let correctX = getShellX(forSlot: ballHiddenUnder)
+
+            // Lift both shells simultaneously
+            guessedShell.run(SKAction.sequence([
+                SKAction.move(to: CGPoint(x: guessedX, y: shellY + 80), duration: 0.3),
+                SKAction.wait(forDuration: 1.5),
+                SKAction.move(to: CGPoint(x: guessedX, y: shellY), duration: 0.3)
+            ]))
+
+            correctShell.run(SKAction.sequence([
+                SKAction.move(to: CGPoint(x: correctX, y: shellY + 80), duration: 0.3),
+                SKAction.wait(forDuration: 1.5),
+                SKAction.move(to: CGPoint(x: correctX, y: shellY), duration: 0.3)
+            ]))
+
             instructionLabel.text = "Wrong! Try again - Tap to continue"
             instructionLabel.fontColor = .systemRed
             run(SKAction.playSoundFileNamed("gameover.caf", waitForCompletion: false))
