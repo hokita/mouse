@@ -18,6 +18,8 @@ class ShellGameScene: SKScene {
     private var backLabel = SKLabelNode(fontNamed: "AvenirNext-Bold")
 
     private var score = 0
+    private var wins = 0
+    private var losses = 0
     private var isShuffling = false
     private var isShowingResult = false
     private var hasGuessed = false
@@ -39,12 +41,12 @@ class ShellGameScene: SKScene {
         scoreLabel.fontSize = 24
         scoreLabel.horizontalAlignmentMode = .left
         scoreLabel.verticalAlignmentMode = .top
-        scoreLabel.position = CGPoint(x: 16, y: size.height - 16)
-        scoreLabel.text = "Score: 0"
+        scoreLabel.position = CGPoint(x: 16, y: size.height - 80)
+        scoreLabel.text = "Wins: 0  Losses: 0"
         addChild(scoreLabel)
 
         instructionLabel.fontSize = 20
-        instructionLabel.position = CGPoint(x: size.width/2, y: size.height - 80)
+        instructionLabel.position = CGPoint(x: size.width/2, y: size.height - 150)
         instructionLabel.text = "Watch carefully..."
         instructionLabel.fontColor = .systemCyan
         addChild(instructionLabel)
@@ -253,6 +255,7 @@ class ShellGameScene: SKScene {
             ]))
 
             score += 1
+            wins += 1
             updateScore()
             instructionLabel.text = "Correct! 🎉 Tap to continue"
             instructionLabel.fontColor = .systemGreen
@@ -277,6 +280,8 @@ class ShellGameScene: SKScene {
                 SKAction.move(to: CGPoint(x: correctX, y: shellY), duration: 0.3)
             ]))
 
+            losses += 1
+            updateScore()
             instructionLabel.text = "Wrong! Try again - Tap to continue"
             instructionLabel.fontColor = .systemRed
             run(SKAction.playSoundFileNamed("gameover.caf", waitForCompletion: false))
@@ -304,7 +309,7 @@ class ShellGameScene: SKScene {
     }
 
     private func updateScore() {
-        scoreLabel.text = "Score: \(score)"
+        scoreLabel.text = "Wins: \(wins)  Losses: \(losses)"
     }
 
     private func goBackToMenu() {
