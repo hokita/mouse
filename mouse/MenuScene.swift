@@ -184,7 +184,7 @@ final class MenuScene: SKScene {
     private func startCollectCoins() {
         stopMouseAnimation()
         guard let view = self.view else { return }
-        let scene = GameScene(size: view.bounds.size)
+        let scene = CollectCoinsScene(size: view.bounds.size)
         scene.scaleMode = .resizeFill
         view.presentScene(scene, transition: .doorsOpenVertical(withDuration: 0.35))
     }

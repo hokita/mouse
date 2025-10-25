@@ -1,5 +1,5 @@
 //
-//  GameScene.swift
+//  CollectCoinsScene.swift
 //  mouse
 //
 //  Created by Hidetaka Okita on 2025/10/08.
@@ -8,7 +8,7 @@
 import SpriteKit
 import GameplayKit
 
-class GameScene: SKScene, SKPhysicsContactDelegate {
+class CollectCoinsScene: SKScene, SKPhysicsContactDelegate {
 
     private enum Physics: UInt32 {
         case player = 1
