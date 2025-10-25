@@ -16,6 +16,7 @@ final class MenuScene: SKScene {
     private let game2Label = SKLabelNode(fontNamed: "AvenirNext-Bold")
     private let game3Label = SKLabelNode(fontNamed: "AvenirNext-Bold")
     private let game4Label = SKLabelNode(fontNamed: "AvenirNext-Bold")
+    private let game5Label = SKLabelNode(fontNamed: "AvenirNext-Bold")
 
     // MARK: - Presenting
     static func present(on skView: SKView, size: CGSize? = nil) {
@@ -145,6 +146,15 @@ final class MenuScene: SKScene {
         game4Label.horizontalAlignmentMode = .center
         game4Label.verticalAlignmentMode = .center
         addChild(game4Label)
+
+        // Game 5 - Memory Card Game
+        game5Label.text = "▶︎ Memory Card Game"
+        game5Label.name = "game_memory_card"
+        game5Label.fontSize = 28
+        game5Label.fontColor = .systemPink
+        game5Label.horizontalAlignmentMode = .center
+        game5Label.verticalAlignmentMode = .center
+        addChild(game5Label)
     }
 
     private func layoutUI() {
@@ -158,6 +168,7 @@ final class MenuScene: SKScene {
         game2Label.position = CGPoint(x: w/2, y: h * 0.34)
         game3Label.position = CGPoint(x: w/2, y: h * 0.26)
         game4Label.position = CGPoint(x: w/2, y: h * 0.18)
+        game5Label.position = CGPoint(x: w/2, y: h * 0.10)
     }
 
     // MARK: - Input
@@ -174,6 +185,8 @@ final class MenuScene: SKScene {
             startRockPaperScissors()
         } else if nodes.contains(where: { $0.name == "game_how_many_balls" }) {
             startHowManyBalls()
+        } else if nodes.contains(where: { $0.name == "game_memory_card" }) {
+            startMemoryCard()
         }
     }
 
@@ -211,5 +224,13 @@ final class MenuScene: SKScene {
         let scene = HowManyBallsScene(size: view.bounds.size)
         scene.scaleMode = .resizeFill
         view.presentScene(scene, transition: .fade(withDuration: 0.35))
+    }
+
+    private func startMemoryCard() {
+        stopMouseAnimation()
+        guard let view = self.view else { return }
+        let scene = MemoryCardScene(size: view.bounds.size)
+        scene.scaleMode = .resizeFill
+        view.presentScene(scene, transition: .doorsOpenVertical(withDuration: 0.35))
     }
 }
