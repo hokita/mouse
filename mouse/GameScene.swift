@@ -92,11 +92,11 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         removeAllActions()
         // Start spawners
         let coinSpawner = SKAction.repeatForever(SKAction.sequence([
-            SKAction.wait(forDuration: 0.6, withRange: 0.6),
+            SKAction.wait(forDuration: 0.4, withRange: 0.4),
             SKAction.run { [weak self] in self?.spawnCoin() }
         ]))
         let enemySpawner = SKAction.repeatForever(SKAction.sequence([
-            SKAction.wait(forDuration: 1.6, withRange: 0.8),
+            SKAction.wait(forDuration: 1.2, withRange: 0.6),
             SKAction.run { [weak self] in self?.spawnEnemy() }
         ]))
         run(coinSpawner, withKey: "coinSpawner")
@@ -141,14 +141,14 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         addChild(node)
 
         // Motion
-        let speed: CGFloat = CGFloat.random(in: 140...220)
+        let speed: CGFloat = CGFloat.random(in: 180...280)
         let duration = TimeInterval((node.position.y + 20) / speed)
         let move = SKAction.moveTo(y: -20, duration: duration)
         node.run(SKAction.sequence([move, .removeFromParent()]))
     }
 
     private func spawnEnemy() {
-        let s: CGFloat = 22
+        let s: CGFloat = 90
         let node = SKShapeNode(rectOf: CGSize(width: s, height: s), cornerRadius: 4)
         node.name = "enemy"
         node.fillColor = .systemRed
@@ -167,7 +167,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         addChild(node)
 
         // Motion
-        let speed: CGFloat = CGFloat.random(in: 220...320)
+        let speed: CGFloat = CGFloat.random(in: 260...380)
         let duration = TimeInterval((node.position.y + 20) / speed)
         let move = SKAction.moveTo(y: -20, duration: duration)
         node.run(SKAction.sequence([move, .removeFromParent()]))
