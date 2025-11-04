@@ -18,6 +18,7 @@ final class MenuScene: SKScene {
     private let game4Label = SKLabelNode(fontNamed: "AvenirNext-Bold")
     private let game5Label = SKLabelNode(fontNamed: "AvenirNext-Bold")
     private let game6Label = SKLabelNode(fontNamed: "AvenirNext-Bold")
+    private let game7Label = SKLabelNode(fontNamed: "AvenirNext-Bold")
 
     // MARK: - Presenting
     static func present(on skView: SKView, size: CGSize? = nil) {
@@ -165,21 +166,31 @@ final class MenuScene: SKScene {
         game6Label.horizontalAlignmentMode = .center
         game6Label.verticalAlignmentMode = .center
         addChild(game6Label)
+
+        // Game 7 - Cheese Chase
+        game7Label.text = "▶︎ Cheese Chase 🧀"
+        game7Label.name = "game_cheese_chase"
+        game7Label.fontSize = 28
+        game7Label.fontColor = .systemYellow
+        game7Label.horizontalAlignmentMode = .center
+        game7Label.verticalAlignmentMode = .center
+        addChild(game7Label)
     }
 
     private func layoutUI() {
         let w = size.width
         let h = size.height
 
-        titleLabel.position = CGPoint(x: w/2, y: h * 0.70)
-        subtitleLabel.position = CGPoint(x: w/2, y: h * 0.62)
+        titleLabel.position = CGPoint(x: w/2, y: h * 0.75)
+        subtitleLabel.position = CGPoint(x: w/2, y: h * 0.68)
 
-        game1Label.position = CGPoint(x: w/2, y: h * 0.48)
-        game2Label.position = CGPoint(x: w/2, y: h * 0.40)
-        game3Label.position = CGPoint(x: w/2, y: h * 0.32)
-        game4Label.position = CGPoint(x: w/2, y: h * 0.24)
-        game5Label.position = CGPoint(x: w/2, y: h * 0.16)
-        game6Label.position = CGPoint(x: w/2, y: h * 0.08)
+        game1Label.position = CGPoint(x: w/2, y: h * 0.56)
+        game2Label.position = CGPoint(x: w/2, y: h * 0.48)
+        game3Label.position = CGPoint(x: w/2, y: h * 0.40)
+        game4Label.position = CGPoint(x: w/2, y: h * 0.32)
+        game5Label.position = CGPoint(x: w/2, y: h * 0.24)
+        game6Label.position = CGPoint(x: w/2, y: h * 0.16)
+        game7Label.position = CGPoint(x: w/2, y: h * 0.08)
     }
 
     // MARK: - Input
@@ -200,6 +211,8 @@ final class MenuScene: SKScene {
             startMemoryCard()
         } else if nodes.contains(where: { $0.name == "game_sweet_stack" }) {
             startSweetStack()
+        } else if nodes.contains(where: { $0.name == "game_cheese_chase" }) {
+            startCheeseChase()
         }
     }
 
@@ -253,5 +266,13 @@ final class MenuScene: SKScene {
         let scene = SweetStackScene(size: view.bounds.size)
         scene.scaleMode = .resizeFill
         view.presentScene(scene, transition: .doorsOpenVertical(withDuration: 0.35))
+    }
+
+    private func startCheeseChase() {
+        stopMouseAnimation()
+        guard let view = self.view else { return }
+        let scene = CheeseChaseScene(size: view.bounds.size)
+        scene.scaleMode = .resizeFill
+        view.presentScene(scene, transition: SKTransition.reveal(with: .down, duration: 0.35))
     }
 }
