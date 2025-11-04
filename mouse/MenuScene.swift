@@ -17,6 +17,7 @@ final class MenuScene: SKScene {
     private let game3Label = SKLabelNode(fontNamed: "AvenirNext-Bold")
     private let game4Label = SKLabelNode(fontNamed: "AvenirNext-Bold")
     private let game5Label = SKLabelNode(fontNamed: "AvenirNext-Bold")
+    private let game6Label = SKLabelNode(fontNamed: "AvenirNext-Bold")
 
     // MARK: - Presenting
     static func present(on skView: SKView, size: CGSize? = nil) {
@@ -155,20 +156,30 @@ final class MenuScene: SKScene {
         game5Label.horizontalAlignmentMode = .center
         game5Label.verticalAlignmentMode = .center
         addChild(game5Label)
+
+        // Game 6 - Sweet Stack
+        game6Label.text = "▶︎ Sweet Stack 🍰"
+        game6Label.name = "game_sweet_stack"
+        game6Label.fontSize = 28
+        game6Label.fontColor = .systemIndigo
+        game6Label.horizontalAlignmentMode = .center
+        game6Label.verticalAlignmentMode = .center
+        addChild(game6Label)
     }
 
     private func layoutUI() {
         let w = size.width
         let h = size.height
 
-        titleLabel.position = CGPoint(x: w/2, y: h * 0.65)
-        subtitleLabel.position = CGPoint(x: w/2, y: h * 0.56)
+        titleLabel.position = CGPoint(x: w/2, y: h * 0.70)
+        subtitleLabel.position = CGPoint(x: w/2, y: h * 0.62)
 
-        game1Label.position = CGPoint(x: w/2, y: h * 0.42)
-        game2Label.position = CGPoint(x: w/2, y: h * 0.34)
-        game3Label.position = CGPoint(x: w/2, y: h * 0.26)
-        game4Label.position = CGPoint(x: w/2, y: h * 0.18)
-        game5Label.position = CGPoint(x: w/2, y: h * 0.10)
+        game1Label.position = CGPoint(x: w/2, y: h * 0.48)
+        game2Label.position = CGPoint(x: w/2, y: h * 0.40)
+        game3Label.position = CGPoint(x: w/2, y: h * 0.32)
+        game4Label.position = CGPoint(x: w/2, y: h * 0.24)
+        game5Label.position = CGPoint(x: w/2, y: h * 0.16)
+        game6Label.position = CGPoint(x: w/2, y: h * 0.08)
     }
 
     // MARK: - Input
@@ -187,6 +198,8 @@ final class MenuScene: SKScene {
             startHowManyBalls()
         } else if nodes.contains(where: { $0.name == "game_memory_card" }) {
             startMemoryCard()
+        } else if nodes.contains(where: { $0.name == "game_sweet_stack" }) {
+            startSweetStack()
         }
     }
 
@@ -230,6 +243,14 @@ final class MenuScene: SKScene {
         stopMouseAnimation()
         guard let view = self.view else { return }
         let scene = MemoryCardScene(size: view.bounds.size)
+        scene.scaleMode = .resizeFill
+        view.presentScene(scene, transition: .doorsOpenVertical(withDuration: 0.35))
+    }
+
+    private func startSweetStack() {
+        stopMouseAnimation()
+        guard let view = self.view else { return }
+        let scene = SweetStackScene(size: view.bounds.size)
         scene.scaleMode = .resizeFill
         view.presentScene(scene, transition: .doorsOpenVertical(withDuration: 0.35))
     }
