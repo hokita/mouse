@@ -14,9 +14,9 @@ class SweetStackScene: SKScene {
     // Game state
     private var isGameOver = false
     private var stackHeight = 0
-    private var currentSpeed: CGFloat = 200.0  // Starting fall speed (pixels/second)
-    private let speedIncrement: CGFloat = 30.0
-    private let speedIncreaseInterval = 5  // Increase speed every 5 successful stacks
+    private var currentSpeed: CGFloat = 150.0  // Starting fall speed (pixels/second)
+    private let speedIncrement: CGFloat = 20.0
+    private let speedIncreaseInterval = 7  // Increase speed every 7 successful stacks
 
     // Game objects
     private var fallingDessert: SKLabelNode?
@@ -34,8 +34,8 @@ class SweetStackScene: SKScene {
 
     // Constants
     private let dessertSize: CGFloat = 60.0
-    private let perfectThreshold: CGFloat = 10.0  // ±10 px for perfect
-    private let goodThreshold: CGFloat = 25.0     // ±25 px for good
+    private let perfectThreshold: CGFloat = 20.0  // ±20 px for perfect
+    private let goodThreshold: CGFloat = 50.0     // ±50 px for good
     private let platformHeight: CGFloat = 100.0
 
     override func didMove(to view: SKView) {
@@ -92,9 +92,9 @@ class SweetStackScene: SKScene {
     func setupTimingZone() {
         // Visual indicator showing the target zone
         timingZone = SKShapeNode(rectOf: CGSize(width: size.width, height: goodThreshold * 2))
-        timingZone.strokeColor = SKColor.systemGreen.withAlphaComponent(0.3)
-        timingZone.lineWidth = 2
-        timingZone.fillColor = .clear
+        timingZone.strokeColor = SKColor.systemGreen.withAlphaComponent(0.8)
+        timingZone.lineWidth = 4
+        timingZone.fillColor = SKColor.systemGreen.withAlphaComponent(0.2)
         updateTimingZonePosition()
         addChild(timingZone)
     }
