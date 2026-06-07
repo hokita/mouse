@@ -106,13 +106,7 @@ class CheeseChaseScene: SKScene {
         mazeContainer.removeAllChildren()
 
         // Determine grid size based on level
-        if level <= 2 {
-            gridSize = 7
-        } else if level <= 4 {
-            gridSize = 9
-        } else {
-            gridSize = 11
-        }
+        gridSize = 7 + (level * 2)  // 9, 11, 13, 15, 17
 
         // Calculate tile size to fit on screen
         let maxMazeSize = min(size.width, size.height) * 0.65
@@ -149,8 +143,10 @@ class CheeseChaseScene: SKScene {
         levelLabel.text = "Level \(level)"
         updateScore()
 
-        // Start timer
-        timeRemaining = 30.0
+        // Start timer — less time at higher levels
+        let levelTimes: [Int: TimeInterval] = [1: 60, 2: 60, 3: 60, 4: 60, 5: 60]
+        timeRemaining = levelTimes[level] ?? 12.0
+        timerLabel.text = "\(Int(timeRemaining))"
         startTimer()
 
         isGameActive = true
@@ -448,7 +444,6 @@ class CheeseChaseScene: SKScene {
     func resetGame() {
         level = 1
         totalScore = 0
-        timeRemaining = 30.0
 
         // Remove any temporary labels
         for node in children {

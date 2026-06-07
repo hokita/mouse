@@ -99,4 +99,4 @@ override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
 - **ShellGameScene**: shuffle count (`6 + score / 2`) and move duration (`0.4`) in the shuffle sequence.
 - **HowManyBallsScene**: ball count range (`1...9`) in `setupBalls()`.
 - **SweetStackScene**: `currentSpeed` (starts 200 px/s), `speedIncrement` (30), `speedIncreaseInterval` (every 5 stacks), `perfectThreshold` (±10 px), `goodThreshold` (±25 px).
-- **CheeseChaseScene**: grid size per level (7×7 → 9×9 → 11×11 at levels 1/3/5+), timer (30 s flat per level), 5 levels total.
+- **CheeseChaseScene**: grid size grows each level (9×9 / 11×11 / 13×13 / 15×15 / 17×17), timer (60 s flat per level), 5 levels total.
