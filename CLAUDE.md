@@ -4,155 +4,99 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Mouse is an iOS arcade game collection built with SpriteKit. The app features a menu system with animated mouse backgrounds and four mini-games. Each game is implemented as a separate SKScene subclass.
+Mouse is an iOS arcade game collection built with SpriteKit. The app features a main menu with an animated mouse-emoji background and seven mini-games, each implemented as a separate `SKScene` subclass.
 
-## Build and Development Commands
+## Build Commands
 
-### Building the Project
 ```bash
-# Build for iOS Simulator (default: iPhone 16)
+# Build for iOS Simulator
 xcodebuild -scheme mouse -destination 'platform=iOS Simulator,name=iPhone 16' build
 
 # Clean build
 xcodebuild -scheme mouse -destination 'platform=iOS Simulator,name=iPhone 16' clean build
 
-# List available schemes and targets
+# List schemes
 xcodebuild -list -project mouse.xcodeproj
 ```
 
-### Running Tests
-This project does not currently have tests configured.
+No tests are configured.
 
 ## Architecture
 
 ### Scene Navigation Flow
 
-The app uses SpriteKit's scene presentation system for navigation:
+```
+GameViewController → MenuScene → [any game scene] → MenuScene
+```
 
-1. **GameViewController** (entry point)
-   - Presents MenuScene on app launch
-   - Configures SKView with debug settings (showsFPS, showsNodeCount)
+- **GameViewController**: presents `MenuScene` on launch; configures `SKView` with `showsFPS`/`showsNodeCount`.
+- **MenuScene**: lists all seven games; uses `MenuScene.present(on:size:)` static method when returning from a game.
+- **Game scenes**: each has a "Back" button (name: `"back_button"`) that calls `goBackToMenu()`, transitioning back with `.push(with: .left, duration: 0.3)`.
 
-2. **MenuScene** (main menu)
-   - Displays four game options with animated mouse emoji background
-   - Static method `present(on:size:)` for presenting from other scenes
-   - Each game button triggers scene transition to respective game scene
+### The Seven Games
 
-3. **Game Scenes** (all inherit from SKScene)
-   - CollectCoinsScene: Dodge-and-collect game with physics-based movement
-   - ShellGameScene: Classic shell game with ball tracking
-   - RockPaperScissorsScene: Rock-paper-scissors against computer
-   - HowManyBallsScene: Count the number of balls displayed
+| Scene | Mechanic | Key state flags |
+|-------|----------|-----------------|
+| `CollectCoinsScene` | Dodge enemies, collect coins; SpriteKit physics | `isGameOver` |
+| `ShellGameScene` | Track ball under shuffling shells | `isShuffling`, `isShowingResult`, `hasGuessed` |
+| `RockPaperScissorsScene` | RPS vs computer | `isShowingResult` |
+| `HowManyBallsScene` | Count balls before time runs out | `isShowingResult` |
+| `MemoryCardScene` | Flip/match 4 emoji pairs (8 cards) | `isProcessing`, `matchedPairs` |
+| `SweetStackScene` | Tap to catch a falling dessert inside the timing zone | `isGameOver`, `stackHeight` |
+| `CheeseChaseScene` | Swipe to navigate a mouse through a procedural maze | `isGameActive`, `level` (1–5) |
 
-4. **Back Navigation**
-   - All game scenes include a "Back" button (top-left)
-   - Returns to MenuScene via `MenuScene.present()` or direct scene initialization
-   - Uses SKTransition effects (.push(with: .left, duration: 0.3))
+### Custom Node Class
 
-### Physics System (CollectCoinsScene)
+`CardNode` (defined inside `MemoryCardScene.swift`) is an `SKNode` subclass that manages card flip animations by scaling `xScale` to 0 and back. It owns `value: String` and `isFlipped: Bool`.
 
-CollectCoinsScene implements SpriteKit physics with custom categories:
-- Uses bitmasks for collision detection (player, coin, enemy, edge)
-- Implements `SKPhysicsContactDelegate` for collision handling
-- Physics bodies are dynamic but not affected by gravity (gravity = .zero)
+### Timer vs SpriteKit Update Loop
 
-### Game State Management
+Most games drive timing via `SKAction.wait` sequences. **CheeseChaseScene** is the exception — it uses a `Foundation.Timer` (`Timer.scheduledTimer`) for its 30-second countdown and invalidates it in `deinit`. Always call `timer?.invalidate()` before presenting another scene from `CheeseChaseScene`.
 
-Games use simple boolean flags for state:
-- `isGameOver` (CollectCoinsScene): Controls game loop and input handling
-- `isShuffling`, `isShowingResult`, `hasGuessed` (ShellGameScene): Multi-phase round control
-- `isShowingResult` (HowManyBallsScene, RockPaperScissorsScene): Prevents input during animations
+### Physics (CollectCoinsScene only)
 
-### Sound Assets
+Uses bitmask categories (player, coin, enemy, edge), `SKPhysicsContactDelegate`, and zero gravity. No other scene uses physics bodies.
 
-Sound files are located in `mouse/Sounds/`:
-- `coin.caf`: Coin collection / tie sound
-- `boom.mp3`: Collision/explosion sound
-- `fail.mp3`: Wrong answer / loss sound
-- `fanfare.mp3`: Win / correct answer sound
-- `gameover.caf`: Game over sound (currently unused)
+### Sound
 
-Played via: `SKAction.playSoundFileNamed(filename, waitForCompletion: false)`
+Files are in `mouse/Sounds/`. Played with `SKAction.playSoundFileNamed(_:waitForCompletion: false)`.
 
-### Scene Transitions
-
-Common transition patterns:
-- Menu → Game: `.doorsOpenVertical`, `.doorsOpenHorizontal`, `.flipHorizontal`, `.fade`
-- Game → Menu: `.push(with: .left, duration: 0.3)`
-- Duration typically 0.25-0.35 seconds
+| File | Used for |
+|------|----------|
+| `coin.caf` | Coin collect, tie, card flip, movement step |
+| `boom.mp3` | Collision/explosion |
+| `fail.mp3` | Wrong answer, time-out |
+| `fanfare.mp3` | Win, correct answer, match found |
+| `gameover.caf` | Unused |
 
 ## Code Patterns
 
-### Scene Setup Pattern
-All scenes follow this structure:
-1. `didMove(to:)` - Main setup method
-2. `setupLabels()` - Create and position UI labels
-3. `setupBackButton()` - Add navigation back button
-4. Game-specific setup methods (e.g., `setupPlayer()`, `setupShells()`)
+### Adding a New Game
+1. Create `NewGameScene.swift` as an `SKScene` subclass in `mouse/`.
+2. Follow the setup order in `didMove(to:)`: `setupLabels()` → `setupBackButton()` → game-specific setup.
+3. Add a new `gameNLabel` in `MenuScene` and wire it in `setupUI()`, `layoutUI()`, and `touchesBegan(_:with:)`.
+4. Use `.push(with: .left, duration: 0.3)` for back navigation; any `SKTransition` is fine for menu → game.
 
 ### UI Positioning
-Uses relative positioning based on scene size:
-- Y positions: `size.height * percentage` (e.g., 0.65 for upper third)
-- X positions: `size.width * percentage` or `size.width / divisions`
-- Allows dynamic layout across different screen sizes
+All positions are relative to `size`: `size.width * 0.5`, `size.height * 0.85`, etc. Never use hardcoded pixel values for primary layout.
 
 ### Touch Handling
-Standard pattern across all scenes:
 ```swift
 override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
     guard let touch = touches.first else { return }
     let location = touch.location(in: self)
     let tappedNodes = nodes(at: location)
-
-    // Check back button first
     if tappedNodes.contains(where: { $0.name == "back_button" }) {
-        goBackToMenu()
-        return
+        goBackToMenu(); return
     }
-
-    // Game-specific touch handling...
+    // game logic...
 }
 ```
 
-### Animation Sequences
-Uses `SKAction` sequences extensively:
-- Combine `.wait`, `.run`, `.move`, `.fade` actions
-- Group simultaneous actions with `.group`
-- Chain sequences with `.sequence`
-- Loop with `.repeatForever` or `.repeat(_:count:)`
+### Difficulty Knobs
 
-## Project Structure
-
-```
-mouse/
-├── AppDelegate.swift                  # iOS app lifecycle
-├── GameViewController.swift           # Entry point, presents MenuScene
-├── MenuScene.swift                    # Main menu with animated background
-├── CollectCoinsScene.swift           # Dodge-and-collect game
-├── ShellGameScene.swift              # Shell game implementation
-├── RockPaperScissorsScene.swift      # RPS game
-├── HowManyBallsScene.swift           # Ball counting game
-├── Assets.xcassets/                  # App icons and assets
-└── Sounds/                           # Game sound effects (.caf, .mp3)
-```
-
-## Common Modifications
-
-### Adding a New Game
-1. Create new `SKScene` subclass in `mouse/` directory
-2. Implement standard setup pattern (labels, back button, game logic)
-3. Add game option to `MenuScene.setupUI()` with unique name
-4. Add touch handler in `MenuScene.touchesBegan()` for new game
-5. Create transition method (e.g., `startNewGame()`)
-
-### Modifying Game Difficulty
-Key parameters to adjust:
-- **CollectCoinsScene**: Spawn intervals (lines 94-100), fall speeds (lines 144, 170)
-- **ShellGameScene**: Shuffle count (line 160: `6 + score / 2`), move duration (line 176: 0.4)
-- **HowManyBallsScene**: Ball count range (line 80: `1...9`)
-
-### Changing Colors/Themes
-Color definitions use `SKColor` with system colors:
-- Menu background: `SKColor(red: 0.05, green: 0.05, blue: 0.15, alpha: 1.0)`
-- Game labels: `.systemYellow`, `.systemTeal`, `.systemPurple`, `.systemOrange`
-- Update in respective scene's setup methods
+- **CollectCoinsScene**: enemy/coin spawn intervals and fall speeds in the `spawnEnemies`/`spawnCoins` methods.
+- **ShellGameScene**: shuffle count (`6 + score / 2`) and move duration (`0.4`) in the shuffle sequence.
+- **HowManyBallsScene**: ball count range (`1...9`) in `setupBalls()`.
+- **SweetStackScene**: `currentSpeed` (starts 200 px/s), `speedIncrement` (30), `speedIncreaseInterval` (every 5 stacks), `perfectThreshold` (±10 px), `goodThreshold` (±25 px).
+- **CheeseChaseScene**: grid size per level (7×7 → 9×9 → 11×11 at levels 1/3/5+), timer (30 s flat per level), 5 levels total.
