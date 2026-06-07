@@ -205,6 +205,23 @@ class CheeseChaseScene: SKScene {
             maze[i][0] = true
             maze[i][gridSize - 1] = true
         }
+
+        // Add extra passages to create loops (multiple routes to the goal)
+        var loopWalls: [(Int, Int)] = []
+        for y in 1..<(gridSize - 1) {
+            for x in 1..<(gridSize - 1) {
+                guard maze[y][x] else { continue }
+                if !maze[y][x - 1] && !maze[y][x + 1] {
+                    loopWalls.append((x, y))
+                } else if !maze[y - 1][x] && !maze[y + 1][x] {
+                    loopWalls.append((x, y))
+                }
+            }
+        }
+        let removeCount = max(2, loopWalls.count / 6)
+        for (wx, wy) in loopWalls.shuffled().prefix(removeCount) {
+            maze[wy][wx] = false
+        }
     }
 
     func drawMaze() {
